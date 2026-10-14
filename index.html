@@ -229,9 +229,8 @@ const IMG={"eng": "UklGRg4zAABXRUJQVlA4WAoAAAAQAAAAhwAAKwEAQUxQSEsVAAABHAVt2zANf
 function runner(t){return `<img class="pl" src="data:image/webp;base64,${IMG[t.id]}" alt="${t.player}">`}
 
 /* ---------- state ---------- */
-let S={active:["eng","arg","bar","rma","por"],steps:10,pos:{},qi:0,done:[],tie:null};
+let S={active:[],steps:10,pos:{},qi:0,done:[],tie:null};
 let sound=true;
-try{const s=JSON.parse(localStorage.getItem("race-tahara")||"null");if(s)S=s}catch(e){}
 function save(){try{localStorage.setItem("race-tahara",JSON.stringify(S))}catch(e){}}
 
 /* ---------- sound ---------- */
@@ -421,13 +420,14 @@ function openSetup(){
   const p=document.getElementById("pickT");p.innerHTML="";
   TEAMS.forEach(t=>{const b=document.createElement("button");b.style.background=t.c;b.className=S.active.includes(t.id)?"on":"";
     b.innerHTML=runner(t)+`${t.flag} ${t.name}<br><small>${t.player}</small>`;
-    b.onclick=()=>{if(S.active.includes(t.id)){if(S.active.length>2)S.active=S.active.filter(x=>x!==t.id)}else S.active=TEAMS.map(x=>x.id).filter(x=>x===t.id||S.active.includes(x));
+    b.onclick=()=>{if(S.active.includes(t.id)){S.active=S.active.filter(x=>x!==t.id)}else S.active=TEAMS.map(x=>x.id).filter(x=>x===t.id||S.active.includes(x));
       SFX.sel();openSetup()};p.appendChild(b)});
   const l=document.getElementById("len");l.innerHTML="";
   [6,8,10,12,15].forEach(n=>{const b=document.createElement("button");b.textContent=n;b.className=S.steps===n?"on":"";b.onclick=()=>{S.steps=n;SFX.sel();openSetup()};l.appendChild(b)});
   document.getElementById("setup").classList.add("on");
 }
 document.getElementById("go").onclick=()=>{
+  if(S.active.length<2){SFX.back();splash("اختر فريقين على الأقل");return}
   const any=Object.values(S.pos).some(v=>v>0);
   if(!any||confirm("مباراة جديدة؟ سيرجع كل اللاعبين لخط البداية")){S.pos={};S.done=[];S.qi=0;S.tie=null}
   save();document.getElementById("setup").classList.remove("on");drawMini();drawTrack();SFX.whistle();splash("⚽ انطلقوا!");
@@ -447,7 +447,7 @@ function confetti(){const c=document.getElementById("cf"),x=c.getContext("2d");c
 
 /* ---------- init ---------- */
 showSlide();drawMini();
-if(!Object.keys(S.pos).length)openSetup();
+openSetup();
 </script>
 </body>
 </html>
